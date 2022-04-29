@@ -18,14 +18,14 @@ jobs:
         run: |
           echo Building Release
           nuget restore
-          msbuild /t:ResxTranslator /property:Configuration=Release
+          msbuild /t:ResXTranslator /property:Configuration=Release
           rm -rf Release
           mkdir -p Release/lib
           mkdir -p Release/bin
-          mv ResxTranslator/bin/Release Release/lib/ResxTranslator
+          mv ResXTranslator/bin/Release Release/lib/ResXTranslator
           echo "#!/bin/sh
           SCRIPT_DIR=\$( cd -- \"\$( dirname -- \"\${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )
-          exec mono \$SCRIPT_DIR/../lib/ResxTranslator/ResxTranslator.exe \"\$@\"" >> Release/bin/resx_translator
+          exec mono \$SCRIPT_DIR/../lib/ResXTranslator/ResxTranslator.exe \"\$@\"" >> Release/bin/resx_translator
           chmod +x Release/bin/resx_translator
           zip -r ${{ steps.get_tag.outputs.tag }}.zip Release
       - name: Create Release
