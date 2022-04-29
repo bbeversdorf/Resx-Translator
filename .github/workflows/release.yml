@@ -19,12 +19,10 @@ jobs:
           echo Building Release
           nuget restore
           rm -rf Release
-          msbuild /t:ResxTranslator /property:Configuration=Release /p:OutDir=./Release
+          msbuild /t:ResxTranslator /property:Configuration=Release /p:OutputPath=../Release/lib/ResxTranslator
           pwd
           ls -ahl
           ls -ahl Release
-          mv ./Release/bin/Release ./Release/lib/ResxTranslator
-          rm -rf ./Release/bin
           mkdir -p ./Release/bin
           echo "#!/bin/sh
           SCRIPT_DIR=\$( cd -- \"\$( dirname -- \"\${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )
