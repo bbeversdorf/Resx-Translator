@@ -22,8 +22,11 @@ jobs:
           rm -rf Release
           pwd
           ls -ahl
-          mkdir -p Release/lib
-          mkdir -p Release/bin
+          mkdir -p ./Release/lib
+          mkdir -p ./Release/bin
+          
+          ls -ahl ResXTranslator
+          ls -ahl ResXTranslator/bin
           mv ./ResXTranslator/bin/Release ./Release/lib/ResXTranslator
           echo "#!/bin/sh
           SCRIPT_DIR=\$( cd -- \"\$( dirname -- \"\${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )
