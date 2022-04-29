@@ -18,7 +18,7 @@ jobs:
         run: |
           echo Building Release
           nuget restore
-          msbuild /t:ResXTranslator /property:Configuration=Release
+          msbuild /t:ResxTranslator /property:Configuration=Release
           rm -rf Release
           mkdir -p Release/lib
           mkdir -p Release/bin
