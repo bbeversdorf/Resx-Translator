@@ -25,12 +25,12 @@ jobs:
           mkdir -p ./Release/lib
           mkdir -p ./Release/bin
           
-          ls -ahl ResXTranslator
-          ls -ahl ResXTranslator/bin
-          mv ./ResXTranslator/bin/Release ./Release/lib/ResXTranslator
+          ls -ahl ResxTranslator
+          ls -ahl ResxTranslator/bin
+          mv ./ResxTranslator/bin/Release ./Release/lib/ResxTranslator
           echo "#!/bin/sh
           SCRIPT_DIR=\$( cd -- \"\$( dirname -- \"\${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )
-          exec mono \$SCRIPT_DIR/../lib/ResXTranslator/ResxTranslator.exe \"\$@\"" >> ./Release/bin/resx_translator
+          exec mono \$SCRIPT_DIR/../lib/ResxTranslator/ResxTranslator.exe \"\$@\"" >> ./Release/bin/resx_translator
           chmod +x ./Release/bin/resx_translator
           zip -r ${{ steps.get_tag.outputs.tag }}.zip ./Release
       - name: Create Release
