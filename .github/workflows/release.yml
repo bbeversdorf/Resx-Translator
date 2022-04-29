@@ -17,8 +17,17 @@ jobs:
       - name: Run build script
         run: |
           echo Building Release
-          ./build_release.sh
-          zip -r ${{ steps.get_tag.outputs.tag }}.zip directory_name
+          nuget restore
+          msbuild ResxTranslator/ResxTranslator.csproj /property:Configuration=Release
+          rm -rf Release
+          mkdir -p Release/lib
+          mkdir -p Release/bin
+          mv ResxTranslator/bin/Release Release/lib/ResxTranslator
+          echo "#!/bin/sh
+          SCRIPT_DIR=\$( cd -- \"\$( dirname -- \"\${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )
+          exec mono \$SCRIPT_DIR/../lib/ResxTranslator/ResxTranslator.exe \"\$@\"" >> Release/bin/resx_translator
+          chmod +x Release/bin/resx_translator
+          zip -r ${{ steps.get_tag.outputs.tag }}.zip Release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
