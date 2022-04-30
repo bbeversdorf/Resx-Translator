@@ -18,7 +18,7 @@ jobs:
         run: |
           echo Building Release
           ./build_release.sh
-          zip -r ${{ steps.get_tag.outputs.tag }}.zip directory_name
+          zip -r ${{ steps.get_tag.outputs.tag }}.zip ./Release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -30,7 +30,7 @@ jobs:
           draft: false
           prerelease: false
       - name: Upload Release Asset
-        id: upload-release-asset 
+        id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
