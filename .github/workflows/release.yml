@@ -17,21 +17,7 @@ jobs:
       - name: Run build script
         run: |
           echo Building Release
-          nuget restore
-          msbuild /t:ResxTranslator /property:Configuration=Release
-          rm -rf Release
-          pwd
-          ls -ahl
-          mkdir -p ./Release/lib
-          mkdir -p ./Release/bin
-          
-          ls -ahl ResXTranslator
-          ls -ahl ResXTranslator/bin
-          mv ./ResXTranslator/bin/Release ./Release/lib/ResXTranslator
-          echo "#!/bin/sh
-          SCRIPT_DIR=\$( cd -- \"\$( dirname -- \"\${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )
-          exec mono \$SCRIPT_DIR/../lib/ResXTranslator/ResxTranslator.exe \"\$@\"" >> ./Release/bin/resx_translator
-          chmod +x ./Release/bin/resx_translator
+          ./build_release.sh
           zip -r ${{ steps.get_tag.outputs.tag }}.zip ./Release
       - name: Create Release
         id: create_release
@@ -44,7 +30,7 @@ jobs:
           draft: false
           prerelease: false
       - name: Upload Release Asset
-        id: upload-release-asset 
+        id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
