@@ -1,18 +1,18 @@
-﻿using Google.Apis.Auth.OAuth2;
-using Google.Cloud.Translation.V2;
+﻿using Google.Cloud.Translate.V3;
+using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
 using System;
-using System.Threading;
+using Google.Api.Gax.ResourceNames;
 
 namespace ResXTranslator.TranslationServices
 {
     public class GoogleTranslation : ITranslator
     {
-        TranslationClient _client;
+        TranslationServiceClient _client;
+        string projectId;
 
         public GoogleTranslation(string path)
         {
@@ -21,23 +21,32 @@ namespace ResXTranslator.TranslationServices
                 Console.WriteLine("Api key not found.");
                 throw new FileNotFoundException($"File {path} was not found.");
             }
-            var credential = GoogleCredential.FromFile(path);
-            _client = TranslationClient.Create(credential);
+            var secretKeyText = File.ReadAllText(path);
+            var secretKey = JsonConvert.DeserializeObject<Dictionary<string, string>>(secretKeyText);
+            projectId = secretKey["project_id"];
+            _client = new TranslationServiceClientBuilder
+            {
+                CredentialsPath = path
+            }.Build();
         }
 
         public GoogleTranslation()
         {
-            _client = TranslationClient.Create();
+            _client = TranslationServiceClient.Create();
         }
 
-        static object ListLanguages(string targetLanguageCode)
+        public IList<SupportedLanguage> ListLanguages()
         {
-            TranslationClient client = TranslationClient.Create();
-            foreach (var language in client.ListLanguages(targetLanguageCode))
+            var request = new GetSupportedLanguagesRequest
             {
-                Console.WriteLine("{0}\t{1}", language.Code, language.Name);
+                Parent = new ProjectName(projectId).ToString()
+            };
+            var languages = _client.GetSupportedLanguages(request).Languages.ToList();
+            foreach (var language in languages)
+            {
+                Console.WriteLine("{0}\t{1}", language.LanguageCode, language.DisplayName);
             }
-            return 0;
+            return languages;
         }
         public async Task<string> TranslateAsync(string text, string language, string sourceLanguage = null)
         {
@@ -45,17 +54,24 @@ namespace ResXTranslator.TranslationServices
             try
             {
                 Console.WriteLine($"Translating {text} to {language}");
-                Type type = typeof(LanguageCodes);
-                var langCode = type.GetFields(BindingFlags.Static | BindingFlags.Public).Select(l => l.GetValue(null).ToString())
-                    .Where(lge => language == lge);
-                if (!langCode.Any())
+
+                if (string.IsNullOrEmpty(text))
                 {
-                    Console.WriteLine("The language code you entered could not be handled.");
-                    Environment.Exit(-1);
+                    return string.Empty;
                 }
-                var result = await _client.TranslateTextAsync(text, langCode.First(), sourceLanguage);
-                Console.WriteLine($"Translated {text} from {result.DetectedSourceLanguage} to {langCode.First()}");
-                translation = result.TranslatedText;
+
+                TranslateTextRequest request = new TranslateTextRequest
+                {
+                    Contents = { text },
+                    TargetLanguageCode = language,
+                    Parent = new ProjectName(projectId).ToString()
+                };
+
+                var result = await _client.TranslateTextAsync(request);
+                var translationResult = result.Translations.FirstOrDefault();
+
+                Console.WriteLine($"Translated {text} from {translationResult?.DetectedLanguageCode} to {language}");
+                translation = translationResult.TranslatedText;
                 await Task.Delay(1000).ConfigureAwait(false);
             }
             catch (Exception e)
